@@ -74,8 +74,8 @@ def analyse(time, angles):
 def main(initial_theta):
     # Modifiable initial conditions
     initial_angle_deg = initial_theta  # degrees
-    string_length = 1.25  # meters
-    damping = 0.05  # linear damping coefficient (1/s); set 0 for no damping
+    string_length = 0.36  # meters
+    damping = 0.00  # linear damping coefficient (1/s); set 0 for no damping
     total_time = 10.0  # seconds
     dt = 0.005  # time step in seconds
 
