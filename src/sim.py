@@ -9,6 +9,15 @@ import matplotlib.pyplot as plt
 import scipy.optimize as sp
 import numpy as np
 
+def _angle_conversion(x):
+    h = 0.31
+    L = 0.635
+    g = 9.81
+    arg = 1 - (x-h)/L
+    print (arg)
+    arg = np.clip(arg, -1.0, 1.0) # keep within bounds of arccos
+    return np.degrees(np.arccos(arg))
+
 def damped_sin_fit(time, A, omega, phi, offset):
     """We select the damped fit because """
     return A*np.sin(omega*time + phi) + offset
@@ -68,16 +77,36 @@ def simulate_pendulum(initial_angle_deg,
 
     return times, angles, omegas
 
-def analyse(time, angles):
-    sp.curve_fit
+def analyse(thetas, string_length=0.635, gravity=9.81):
+    """Run simulations for multiple theta values and plot period vs angle."""
+    periods = []
+    
+    for theta in thetas:
+        times, angles, _ = simulate_pendulum(theta, string_length, total_time=10.0, dt=0.005, gravity=gravity, damping=0.0)
+        
+        # Extract period by detecting peaks (local maxima)
+        angles_arr = np.array(angles)
+        peaks = []
+        for i in range(1, len(angles_arr) - 1):
+            if angles_arr[i] > angles_arr[i-1] and angles_arr[i] > angles_arr[i+1]:
+                peaks.append(i)
+        
+        if len(peaks) >= 2:
+            # Period is 2 * time between peaks (one peak per half-period)
+            period = (times[peaks[1]] - times[peaks[0]])
+        else:
+            period = np.nan
+        periods.append(period)
+
+    return periods
 
 def main(initial_theta):
     # Modifiable initial conditions
     initial_angle_deg = initial_theta  # degrees
-    string_length = 0.36  # meters
+    string_length = 0.635  # meters
     damping = 0.00  # linear damping coefficient (1/s); set 0 for no damping
     total_time = 10.0  # seconds
-    dt = 0.005  # time step in seconds
+    dt = 0.001  # time step in seconds
 
     times, angles, omegas = simulate_pendulum(
         initial_angle_deg,
@@ -111,7 +140,9 @@ def main(initial_theta):
     plt.tight_layout()
     plt.show()
 
+
+
 if __name__ == '__main__':
-    main(125.0)
-    main(100)
-    main(50)
+    print(analyse([17.77039874, 23.2673182,  27.72257619, 31.02459719, 35.22750383, 17.77039874,
+ 23.02030757, 28.50490012, 31.74858639, 33.23620551, 18.87192299, 22.32804987,
+ 28.95936908, 31.76097448, 34.17080015]))
